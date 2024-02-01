@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1.title Module Task Manager
+
+  section.task-assignment
+    h2 Assign Task
+    form(action="/assigntask", method="post")
+      input(type="text", name="description", placeholder="Task Description")
+      select(name="module_id")
+        each module in modules
+          option(value=module.id)= module.title
+      select(name="master_choice")
+        option(value="all") All Masters
+        each module in modules
+          - var masterIds = module.master_ids ? module.master_ids.split(',') : []
+          - var masterNames = module.master_names ? module.master_names.split(',') : []
+          each id, index in masterIds
+            option(value=id)= masterNames[index]
+      input(type="submit", value="Assign Task")
+
+  section.tasks-list
+    h2 Tasks
+    ul.tasks
+      each task in tasks
+        li.task-item
+          | #{task.module_title} - #{task.description} | Assigned to: #{task.assigned_to || 'None'} | Status: #{task.is_complete ? 'Complete' : 'Incomplete'}
+          if !task.is_complete
+            form(action="/markcomplete", method="post", style="display: inline")
+              input(type="hidden", name="task_id", value=task.id)
+              input(type="submit", value="Mark Complete")
